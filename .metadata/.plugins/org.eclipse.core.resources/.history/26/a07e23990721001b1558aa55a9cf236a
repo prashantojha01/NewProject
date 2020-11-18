@@ -1,0 +1,5 @@
+package com.accenture.firstexample.bean;
+
+public class Student {
+
+}

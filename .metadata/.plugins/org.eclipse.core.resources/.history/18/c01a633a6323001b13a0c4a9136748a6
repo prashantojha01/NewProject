@@ -1,0 +1,11 @@
+package com.accenture.firstexample;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.accenture.firstexample.entity.StudentEntity;
+
+@Repository
+public interface StudentDao extends CrudRepository<StudentEntity, Integer>{
+	
+}

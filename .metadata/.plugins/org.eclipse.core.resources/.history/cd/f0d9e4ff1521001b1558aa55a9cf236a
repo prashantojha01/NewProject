@@ -1,0 +1,5 @@
+package com.accenture.firstexample.dao;
+
+public class StudentDao {
+
+}

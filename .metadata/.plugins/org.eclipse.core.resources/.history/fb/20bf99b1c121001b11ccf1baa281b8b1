@@ -1,0 +1,13 @@
+package com.accenture.firstexample.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class FirstController {
+
+	@RequestMapping("/hi")
+	public String hello() {
+		return "Ojha has created his first Spring boot Application";
+	}
+}

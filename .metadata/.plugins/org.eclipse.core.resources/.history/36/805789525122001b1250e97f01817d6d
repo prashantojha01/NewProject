@@ -1,0 +1,153 @@
+package com.acn.sl.rest.api;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.acm.srpttless.objectReader.core.api.APIReader;
+import com.acm.srpttless.objectReader.core.api.ApiScanInput;
+import com.acm.srpttless.objectReader.core.api.ApiType;
+import com.acm.srpttless.objectReader.core.api.MsgType;
+import com.acm.srpttless.objectReader.core.api.PayloadType;
+import com.acm.srpttless.objectReader.domain.UserAction;
+import com.acm.srpttless.objectReader.domain.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.acn.sl.service.IApiBusinessServices;
+
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@RestController
+@RequestMapping("/bapp")
+public class ApiController {
+
+	@Autowired
+	private IApiBusinessServices businessService;
+
+	@ApiOperation(value = "Find target service by id.", notes = "also returns all target service details", nickname = "getServiceById")
+	@RequestMapping(value = "/service/{serviceId}", method = RequestMethod.GET, produces = "application/json")
+	public ServiceFacade getServiceById(@PathVariable("serviceId") int serviceId) {
+		IApiService s = businessService.getServiceById(serviceId);		
+		return new ServiceFacade(s, businessService.getUserActionsByServiceId(serviceId));
+	}
+
+	@ApiOperation(value = "Find all target Service.", notes = "also returns all target service details", nickname = "getAllService")
+	@RequestMapping(path = "/app/{appId}", method = RequestMethod.GET, produces = "application/json")
+	public List<ServiceFacade> getServices(@PathVariable("appId") int appId) {
+		List<IApiService> service = businessService.getAllService(appId);
+		return service.stream().map(s -> new ServiceFacade(s)).collect(Collectors.toList());
+
+	}
+
+	@ApiOperation(value = "Create a new service")
+	@RequestMapping(path = "/app/{appId}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public ServiceFacade createApplication(@PathVariable("appId") int appId,
+										   @RequestBody ServiceCreateRequest request) {
+		IApiService apiService = new RestApiService(null, request.getName(), request.getApiType(), request.getMsgType(),
+				request.getPayloadType(), request.getMethodType());
+		List<UserAction> userActionList = businessService.create(apiService, request.getUrl(), appId);
+		return new ServiceFacade(apiService, userActionList);
+	}
+
+	@ApiOperation(value = "Update target service by id.", notes = "also returns all target service details", nickname = "updateServiceById")
+	@RequestMapping(value = "/service/{serviceId}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
+	public ServiceFacade updateServiceById(@PathVariable("serviceId") int serviceId,
+										   @RequestBody ServiceCreateRequest request) {
+		IApiService apiService = new RestApiService(serviceId, request.getName(), request.getApiType(),
+				request.getMsgType(), request.getPayloadType(), request.getMethodType());
+		return new ServiceFacade(businessService.updateServiceById(apiService, request.getUrl()));
+	}
+
+	@ApiOperation(value = "Find Request objects by Request Id", notes = "returns all Request objects by Request Id for all types", nickname = "getServiceById")
+	@RequestMapping(value = "/services/req/params/request/{requestId}", method = RequestMethod.GET, produces = "application/json")
+	public ObjectFacade getRequestObjectsById(@PathVariable("requestId") int requestId) {
+		List<ApiObjectDetails> apiObjectDetailsList = businessService.getObjectByReq(requestId, null);
+		return new ObjectFacade(apiObjectDetailsList);
+	}
+
+	@ApiOperation(value = "Find Request objects by Request Id and type", notes = "returns all Request objects by Request Id and type ", nickname = "getServiceById")
+	@RequestMapping(value = "/services/req/params/request/{requestId}/type/{type}", method = RequestMethod.GET, produces = "application/json")
+	public ObjectFacade getRequestObjectsByIdAndType(@PathVariable("requestId") int requestId,
+													 @PathVariable("type") String type) {
+		List<ApiObjectDetails> apiObjectDetailsList = businessService.getObjectByReq(requestId,
+				ApiObjectRelationType.valueOf(type));
+		return new ObjectFacade(apiObjectDetailsList);
+	}
+
+	@ApiOperation(value = "Find Request Payload by Request Id", notes = "returns all Request payload by Request Id", nickname = "getRequestPayloadById")
+	@RequestMapping(value = "/services/req/payload/request/{requestId}", method = RequestMethod.GET, produces = "application/json")
+	public String getRequestPayloadById(@PathVariable("requestId") int requestId) {
+		ApiPayload apiPayload = businessService.getPayloadByRefId(requestId);
+		return apiPayload == null ? "": apiPayload.getPayload();
+	}
+
+	@ApiOperation(value = "Create / Update payload", notes = "Create / Update payload", nickname = "createUpdateRequestPayload")
+	@RequestMapping(value = "/services/req/payload/request/{requestId}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public void createUpdateRequestPayload(@PathVariable("requestId") int requestId,
+										   @RequestBody PayloadCreateRequest payloadCreateRequest) {
+		businessService.savePayload(requestId, payloadCreateRequest.getPayload());
+	}
+
+	@ApiOperation(value = "Find Response Payload by Response Id", notes = "returns all Response payload by Response Id", nickname = "getResponsePayloadById")
+	@RequestMapping(value = "/services/res/payload/response/{responseId}", method = RequestMethod.GET, produces = "application/json")
+	public String getResponsePayloadById(@PathVariable("responseId") int responseId) {
+		ApiPayload apiPayload = businessService.getPayloadByRefId(responseId);
+		return apiPayload == null ? "": apiPayload.getPayload().toString();
+	}
+
+	@ApiOperation(value = "Create / Update payload", notes = "Create / Update payload", nickname = "createUpdateResponsePayload")
+	@RequestMapping(value = "/services/res/payload/response/{responseId}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public void createUpdateResponsePayload(@PathVariable("responseId") int responseId, @RequestBody PayloadCreateRequest payloadCreateRequest) {
+		businessService.savePayload(responseId, payloadCreateRequest.getPayload());
+	}
+
+	@ApiOperation(value = "Create and update Header or Query Param for a Service", notes = "returns all Request objects by Request Id and type ", nickname = "createUpdateRequestObjects")
+	@RequestMapping(value = "/services/req/params/request/{requestId}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public void createUpdateRequestObjects(@PathVariable("requestId") int requestId, @RequestBody List<RestRequestObject> request) {
+		IApiService apiService = new RestApiService();
+		ApiRequest apiRequest = new ApiRequest();
+		apiRequest.setId(requestId);
+		apiRequest.setApiObjectDetails(request.stream().map(object -> {
+
+			ApiObjectDetails detail = new ApiObjectDetails(object.getObjectId(), object.getName(), object.getPath(),
+					object.getRelationType(), object.getDataType(), object.getValue(), object.getUserActionId());
+			return detail;
+
+		}).collect(Collectors.toList()));
+		apiService.setRequest(apiRequest);
+		businessService.createUpdateRequestObjects(apiService);
+	}
+	
+	@ApiOperation(value = "Execute a service request", notes = "Execute a service request", nickname = "scanservice")
+	@RequestMapping(value = "/services/scan/service/{serviceId}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public void scanService(@PathVariable("serviceId") Integer serviceId) throws Exception {	
+		
+		businessService.scan(serviceId);
+		//businessService.savePayload(responseId, payloadCreateRequest.getPayload());
+	}
+
+	@ApiOperation(value = "delete api object by api object id")
+	@RequestMapping(value = "/apiobject", method = RequestMethod.DELETE)
+	public Integer deleteApiObjectByApiObjectIdList(@RequestParam("apiobjectids") List<Integer> apiobjectids){
+		Integer deletedObjects =0;
+		deletedObjects+=businessService.deleteApiObjectByApiObjectIdList(apiobjectids);
+		return deletedObjects;
+	}
+
+	@ApiOperation(value = "delete api service by api service id")
+	@RequestMapping(value = "/apiservice", method = RequestMethod.DELETE)
+	public Integer deleteApiServiceByApiServiceIdList(@RequestParam("apiserviceids") List<Integer> apiserviceids){
+		Integer deletedApiService =0;
+		deletedApiService+=businessService.deleteApiServiceByApiServiceIdList(apiserviceids);
+		return deletedApiService;
+	}
+
+	@ApiOperation(value = "delete api application by api application id")
+	@RequestMapping(value = "/apiapplication/{applicationId}", method = RequestMethod.DELETE)
+	public Integer deleteApiApplicationByApplicationId(@PathVariable("applicationId")Integer applicationId){
+		Integer deletedApiApplication =0;
+		deletedApiApplication+=businessService.deleteApiApplicationByApplicationId(applicationId);
+		return deletedApiApplication;
+	}
+}

@@ -1,0 +1,15 @@
+package com.accenture.firstexample;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages = "com.accenture.FirstExampleApplication")
+public class FirstExampleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(FirstExampleApplication.class, args);
+	}
+
+}

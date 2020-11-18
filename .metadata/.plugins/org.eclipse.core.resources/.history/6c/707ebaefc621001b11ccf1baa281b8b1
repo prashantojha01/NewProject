@@ -1,0 +1,31 @@
+package com.accenture.firstexample.service;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.accenture.firstexample.bean.Student;
+
+@Service
+public class StudentService {
+	 private List<Student> students= Arrays.asList(
+				new Student("ojha", 1),
+				new Student("Baba", 2),
+				new Student("Jindabad", 3)
+				);
+	
+	public List<Student> getAllStudentsDetails() {
+		return students;
+	}
+	
+	public Student getStudentById(Integer id) {
+		Student student = new Student();
+		return student;
+	}
+	
+	/*
+	 * public Student getStudentById(Integer id) { return students.stream().filter(t ->
+	 * t.getId().equals(id)).findFirst().get(); }
+	 */
+}

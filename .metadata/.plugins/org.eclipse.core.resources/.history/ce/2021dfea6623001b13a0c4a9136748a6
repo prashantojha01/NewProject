@@ -1,0 +1,54 @@
+package com.accenture.student.qualification;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class QualificationService {
+	//private List<Student> students =new ArrayList<>(Arrays.asList(new Student("ojha", 1), new Student("Baba", 2),
+		//	new Student("Jindabad", 3)));
+	@Autowired
+	private QualificationDao qualificationDao;
+	public List<QualificationEntity> getAllQualificationDetails() {
+		List<QualificationEntity> qualifications= new ArrayList<QualificationEntity>();
+		qualificationDao.findAll().forEach(students::add);
+		return students;
+	}
+
+	
+	
+	 public Optional<QualificationEntity> getStudentById(Integer id) { 
+		 return qualificationDao.findById(id);
+	 }
+	 
+	 
+
+	
+	 //public Student getStudentById(Integer id) { return students.stream().filter(t
+	 //-> t.getId().equals(id)).findFirst().get(); }
+
+
+	public void addStudent(QualificationEntity qualificationEntity) {
+		// TODO Auto-generated method stub
+		qualificationDao.save(qualificationEntity);
+	}
+
+
+	public void updateStudent(Integer id,QualificationEntity qualificationEntity) {
+		// TODO Auto-generated method stub
+		
+		qualificationDao.save(qualificationEntity);
+	}
+
+
+
+	public void deleteStudent(Integer id) {
+		// TODO Auto-generated method stub
+		qualificationDao.deleteById(id);
+	}
+	 
+}

@@ -1,0 +1,48 @@
+package com.accenture.student;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import com.accenture.student.qualification.QualificationEntity;
+
+@Entity
+public class StudentEntity {
+	private String name;
+	@Id
+	private Integer id;
+	@OneToMany(mappedBy = "student")
+	private QualificationEntity qualificationEntity;
+	public QualificationEntity getQualificationEntity() {
+		return qualificationEntity;
+	}
+	public void setQualificationEntity(QualificationEntity qualificationEntity) {
+		this.qualificationEntity = qualificationEntity;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	@Override
+	public String toString() {
+		return "Student [name=" + name + ", id=" + id + "]";
+	}
+	public StudentEntity(String name, Integer id) {
+		super();
+		this.name = name;
+		this.id = id;
+	}
+	public StudentEntity() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+}

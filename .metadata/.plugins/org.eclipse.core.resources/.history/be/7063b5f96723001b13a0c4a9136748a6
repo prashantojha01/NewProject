@@ -1,0 +1,42 @@
+package com.accenture.student.qualification;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class QualificationController {
+	@Autowired
+	private QualificationService qualificationService;
+	
+	@RequestMapping("/studentById/{topicid}/qualifications")
+	public List<QualificationEntity> getDetails(){
+		return qualificationService.getAllQualificationDetails();
+	}
+	@RequestMapping("/studentById/{topicId}/qualificationById/{qualificationId}")
+	public Optional<QualificationEntity> namedoesntmatter(@PathVariable Integer qualificationId) {
+		return qualificationService.getQualificationById(qualificationId);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/studentById/{id}/addQualification")
+	public void addStudent(@RequestBody QualificationEntity qualificationEntity) {
+		qualificationService.addQualification(qualificationEntity);
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, value = "/updateStudent/{id}/updateQualification/{id}")
+	public void uodateStudent(@RequestBody QualificationEntity qualificationEntity, @PathVariable Integer id) {
+		qualificationService.updateQualification(id, qualificationEntity);
+	}
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/deleteStudent/{id}/deleteQualification/{id}")
+	public void deleteQualification(@PathVariable Integer id) {
+		qualificationService.deleteQualification(id);
+		}
+}
+
